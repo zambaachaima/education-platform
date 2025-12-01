@@ -7,18 +7,26 @@ export default function CourseView() {
   const [courses, setCourses] = useState([]);
 
   useEffect(() => {
-    // Écoute temps réel
     const unsubscribe = controller.listenCourses(setCourses);
     return () => unsubscribe();
   }, []);
 
+  // 👇 ONLY show published courses
+  const visibleCourses = courses.filter(c => c.isPublished === true);
+
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-blue-700">Catalogue des cours</h1>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {courses.map(course => (
-          <CourseCard key={course.id} course={course} />
-        ))}
+    <div className="page-container">
+      <div className="admin-lesson-wrapper">
+        <h1 className="page-title">Catalogue des cours</h1>
+        <p className="course-info">
+          {visibleCourses.length} cours disponibles
+        </p>
+
+        <div className="lessons-grid">
+          {visibleCourses.map(course => (
+            <CourseCard key={course.id} course={course} />
+          ))}
+        </div>
       </div>
     </div>
   );

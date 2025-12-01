@@ -1,14 +1,65 @@
-export default function CourseCard({ course }) {
+// src/components/CourseCard.jsx
+import { useState, useEffect } from "react";
+import PurchaseController from "../controllers/PurchaseController";
+import PaymentController from "../controllers/PaymentController";
+import { getAuth } from "firebase/auth";
+
+export default function CourseCard({ course, isAdmin }) {
+  const auth = getAuth();
+  const purchaseCtrl = new PurchaseController();
+  const paymentCtrl = new PaymentController();
+  const [owns, setOwns] = useState(false);
+  const user = auth.currentUser;
+
+  useEffect(() => {
+    const check = async () => {
+      if (!user) return;
+      const has = await purchaseCtrl.userOwnsCourse(user.uid, course.id);
+      setOwns(has);
+    };
+    check();
+  }, [user]);
+
+  const handleBuy = async () => {
+    if (!user) return alert("Veuillez vous connecter");
+
+    const pay = await paymentCtrl.startPayment(course.price, course.id, user.uid);
+
+    if (pay.status === "success") {
+      await purchaseCtrl.addPurchase(user.uid, course.id);
+      alert("🎉 Paiement réussi ! Vous avez accès au cours.");
+      setOwns(true);
+    } else {
+      alert("Erreur lors du paiement !");
+    }
+  };
+
   return (
-    <div className="border rounded p-4 shadow hover:shadow-lg transition w-full md:w-80">
-      <h3 className="text-lg font-bold mb-2">{course.title}</h3>
-      <p className="text-gray-700 mb-2">{course.description}</p>
-      <p className="font-semibold mb-2">
-        Prix : {course.price > 0 ? `${course.price} TND` : "Gratuit"}
-      </p>
-      <p className={course.isPublished ? "text-green-600" : "text-red-600"}>
-        {course.isPublished ? "Publié" : "Non publié"}
-      </p>
+    <div className="border p-4 rounded bg-white shadow flex flex-col justify-between h-full">
+      <div>
+        <h2 className="text-xl font-semibold">{course.title}</h2>
+        <p>{course.description}</p>
+        <p className="font-bold mt-2">{course.price} TND</p>
+      </div>
+
+      <div className="mt-3">
+        {!isAdmin && (
+          <>
+            {owns ? (
+              <button className="bg-green-600 text-white px-4 py-2 rounded w-full">
+                ✔ Déjà acheté
+              </button>
+            ) : (
+              <button
+                onClick={handleBuy}
+                className="bg-blue-600 text-white px-4 py-2 rounded w-full"
+              >
+                Acheter
+              </button>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

@@ -11,6 +11,14 @@ import {
   updateDoc,
   getDoc,
 } from "firebase/firestore";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
+import { getAuth } from "firebase/auth";
 
 // 🔑 Configuration Firebase depuis .env
 const firebaseConfig = {
@@ -24,8 +32,10 @@ const firebaseConfig = {
 };
 
 // Initialise Firebase
-export const app = initializeApp(firebaseConfig); // ⚠️ exporté pour Auth
+export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+export const storage = getStorage(app); // 🔹 export Storage
+export const auth = getAuth(app);
 
 // --- Firestore CRUD (users) ---
 export async function getAllUsersFromDB() {
@@ -46,8 +56,8 @@ export async function getAllUsersFromDB() {
 }
 
 export async function addUserToDB(user) {
-  const ref = collection(db, "users");
-  const docRef = await addDoc(ref, {
+  const refCol = collection(db, "users");
+  const docRef = await addDoc(refCol, {
     ...user,
     createdAt: new Date(),
     updatedAt: null,
@@ -100,4 +110,20 @@ export function listenToUsers(callback) {
     });
     callback(users);
   });
+}
+
+// --- Firebase Storage helper functions ---
+export async function uploadFile(file, folder = "lessons") {
+  if (!file) return null;
+
+  const fileRef = ref(storage, `${folder}/${file.name}_${Date.now()}`);
+  await uploadBytes(fileRef, file);
+  const fileUrl = await getDownloadURL(fileRef);
+  return { fileUrl, fileName: file.name };
+}
+
+export async function deleteFile(fileUrl) {
+  if (!fileUrl) return;
+  const fileRef = ref(storage, fileUrl);
+  await deleteObject(fileRef);
 }

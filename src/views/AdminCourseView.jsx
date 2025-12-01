@@ -99,144 +99,108 @@ export default function AdminCourseView() {
   const draftCount = courses.length - publishedCount;
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-blue-700">Gestion des cours</h1>
+    <div className="page-container">
+      <div className="admin-course-wrapper">
+        <h1 className="page-title">Gestion des cours</h1>
 
-      {/* Stats */}
-      <div className="flex gap-6 mb-6">
-        <div className="p-4 border rounded bg-gray-100 w-1/3">
-          <strong className="text-lg">Statistiques :</strong>
-          <p>Publié : {publishedCount}</p>
-          <p>Brouillon : {draftCount}</p>
+        {/* Stats */}
+        <div className="stats-container">
+          <div className="stat-card">
+            <strong>Statistiques :</strong>
+            <p>Publié : {publishedCount}</p>
+            <p>Brouillon : {draftCount}</p>
+          </div>
         </div>
-      </div>
 
-      {/* Actions + recherche + tri */}
-      <div className="flex flex-col md:flex-row md:justify-between gap-4 mb-4">
-        <button
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 w-full md:w-auto"
-          onClick={handleAddClick}
-        >
-          Ajouter un cours
-        </button>
+        {/* Actions + recherche + tri */}
+        <div className="controls-container">
+          <button className="btn btn-add" onClick={handleAddClick}>
+            Ajouter un cours
+          </button>
 
-        <input
-          type="text"
-          placeholder="Rechercher..."
-          className="border p-2 rounded w-full md:w-60"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+          <input
+            type="text"
+            placeholder="Rechercher..."
+            className="input-search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
 
-        <div className="flex gap-2">
-          <select
-            value={sortField}
-            onChange={(e) => setSortField(e.target.value)}
-            className="border p-2 rounded"
-          >
-            <option value="title">Titre</option>
-            <option value="price">Prix</option>
-          </select>
-          <select
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value)}
-            className="border p-2 rounded"
-          >
-            <option value="asc">Ascendant</option>
-            <option value="desc">Descendant</option>
-          </select>
+          <div className="sort-controls">
+            <select value={sortField} onChange={(e) => setSortField(e.target.value)}>
+              <option value="title">Titre</option>
+              <option value="price">Prix</option>
+            </select>
+            <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+              <option value="asc">Ascendant</option>
+              <option value="desc">Descendant</option>
+            </select>
+          </div>
         </div>
-      </div>
 
-      {/* Form */}
-      {showForm && (
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col md:flex-row gap-4 mb-6 p-4 border rounded bg-gray-50 items-center"
-        >
-          <input
-            name="title"
-            placeholder="Titre"
-            value={form.title}
-            onChange={handleChange}
-            className="border p-2 rounded w-full md:w-40"
-            required
-          />
-          <input
-            name="price"
-            type="number"
-            placeholder="Prix"
-            value={form.price}
-            onChange={handleChange}
-            className="border p-2 rounded w-full md:w-40"
-            required
-          />
-          <input
-            name="description"
-            placeholder="Description"
-            value={form.description}
-            onChange={handleChange}
-            className="border p-2 rounded w-full md:w-60"
-          />
-          <label className="flex items-center gap-1">
-            Publier :
+        {/* Form */}
+        {showForm && (
+          <form onSubmit={handleSubmit} className="form-course">
             <input
-              type="checkbox"
-              name="isPublished"
-              checked={form.isPublished}
+              name="title"
+              placeholder="Titre"
+              value={form.title}
+              onChange={handleChange}
+              required
+            />
+            <input
+              name="price"
+              type="number"
+              placeholder="Prix"
+              value={form.price}
+              onChange={handleChange}
+              required
+            />
+            <input
+              name="description"
+              placeholder="Description"
+              value={form.description}
               onChange={handleChange}
             />
-          </label>
-          <div className="flex gap-2">
-            <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-              {editingCourse ? "Enregistrer" : "Ajouter"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowForm(false)}
-              className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
-            >
-              Annuler
-            </button>
-          </div>
-        </form>
-      )}
+            <label>
+              Publier :
+              <input
+                type="checkbox"
+                name="isPublished"
+                checked={form.isPublished}
+                onChange={handleChange}
+              />
+            </label>
+            <div className="form-buttons">
+              <button className="btn btn-submit">
+                {editingCourse ? "Enregistrer" : "Ajouter"}
+              </button>
+              <button
+                type="button"
+                className="btn btn-cancel"
+                onClick={() => setShowForm(false)}
+              >
+                Annuler
+              </button>
+            </div>
+          </form>
+        )}
 
-      {/* Tableau */}
-      <div className="overflow-x-auto border rounded">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titre</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Publié</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {sortedCourses.map(c => (
-              <tr key={c.id}>
-                <td className="px-6 py-4 whitespace-nowrap">{c.title}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{c.price} TND</td>
-                <td className="px-6 py-4 whitespace-nowrap">{c.isPublished ? "✅" : "❌"}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-right flex gap-2 justify-end">
-                  <button
-                    onClick={() => handleEdit(c)}
-                    className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    onClick={() => handleDelete(c.id)}
-                    className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                  >
-                    🗑️
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* Courses Table */}
+        <div className="courses-grid">
+          {sortedCourses.map((c) => (
+            <div key={c.id} className="course-card">
+              <h3 className="course-title">{c.title}</h3>
+              <p className="course-desc">{c.description}</p>
+              <p className="course-price">{c.price} TND</p>
+              <p className="course-status">{c.isPublished ? "✅ Publié" : "❌ Brouillon"}</p>
+              <div className="course-actions">
+                <button className="btn btn-edit" onClick={() => handleEdit(c)}>✏️</button>
+                <button className="btn btn-delete" onClick={() => handleDelete(c.id)}>🗑️</button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

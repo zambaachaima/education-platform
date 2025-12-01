@@ -1,12 +1,24 @@
 import { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+
 import AuthForm from "./views/AuthForm";
 import MainPage from "./views/MainPage";
 import UserView from "./views/UserView";
+
 import CourseView from "./views/CourseView";
 import AdminCourseView from "./views/AdminCourseView";
+
+import LessonView from "./views/LessonView";
+import AdminLessonView from "./views/AdminLessonView";
+
+import QuizListView from "./views/QuizListView";   // NEW
+import QuizView from "./views/QuizView";           // NEW
+import AdminQuizView from "./views/AdminQuizView"; // NEW
+import QuizHistoryView from "./views/QuizHistoryView"; 
+
 import ProtectedRoute from "./components/ProtectedRoute";
+
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./services/firebaseService";
 
@@ -19,6 +31,7 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+
       if (currentUser) {
         const docRef = doc(db, "users", currentUser.uid);
         const docSnap = await getDoc(docRef);
@@ -26,8 +39,10 @@ function App() {
       } else {
         setUserData(null);
       }
+
       setLoading(false);
     });
+
     return () => unsubscribe();
   }, [auth]);
 
@@ -38,8 +53,14 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={!user ? <AuthForm /> : <Navigate to="/main" />} />
 
+        {/* Authentication */}
+        <Route
+          path="/"
+          element={!user ? <AuthForm /> : <Navigate to="/main" />}
+        />
+
+        {/* Main dashboard */}
         <Route
           path="/main"
           element={
@@ -49,6 +70,7 @@ function App() {
           }
         />
 
+        {/* Admin: User management */}
         <Route
           path="/users"
           element={
@@ -58,6 +80,7 @@ function App() {
           }
         />
 
+        {/* Courses */}
         <Route
           path="/courses"
           element={
@@ -76,7 +99,68 @@ function App() {
           }
         />
 
+        {/* Lessons */}
+        <Route
+          path="/lesson/:courseId"
+          element={
+            <ProtectedRoute user={user} userData={userData}>
+              <LessonView />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/lessons/:courseId"
+          element={
+            <ProtectedRoute user={user} userData={userData} adminOnly>
+              <AdminLessonView />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Quizzes */}
+        <Route
+          path="/quizzes/:courseId"  // List of quizzes for a course (user)
+          element={
+            <ProtectedRoute user={user} userData={userData}>
+              <QuizListView />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/quiz/:quizId"       // Single quiz view (user)
+          element={
+            <ProtectedRoute user={user} userData={userData}>
+              <QuizView />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/quizzes/:courseId" // Admin manages quizzes for a course
+          element={
+            <ProtectedRoute user={user} userData={userData} adminOnly>
+              <AdminQuizView />
+            </ProtectedRoute>
+          }
+        />
+
+
+
+          <Route
+            path="/quiz-history"
+            element={
+              <ProtectedRoute user={user} userData={userData}>
+                <QuizHistoryView />
+              </ProtectedRoute>
+            }
+          />
+
+
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" />} />
+
       </Routes>
     </Router>
   );

@@ -8,11 +8,8 @@ export default function AuthForm() {
   const [currentUser, setCurrentUser] = useState(null);
   const auth = getAuth();
 
-  // 🔁 Vérifie si un utilisateur est connecté
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-    });
+    const unsubscribe = onAuthStateChanged(auth, (user) => setCurrentUser(user));
     return () => unsubscribe();
   }, [auth]);
 
@@ -21,7 +18,6 @@ export default function AuthForm() {
     try {
       if (isLogin) {
         await login(form.email, form.password);
-        // 👇 pas de alert ici
       } else {
         if (form.password !== form.confirmPassword)
           return alert("Les mots de passe ne correspondent pas !");
@@ -45,76 +41,72 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="p-6 border rounded w-80 mx-auto mt-10">
-      <h2 className="text-xl font-bold mb-4">{isLogin ? "Connexion" : "Inscription"}</h2>
+    <div className="page-container">
+      <div className="admin-lesson-wrapper">
+        <div className="lesson-card" style={{ maxWidth: "400px", margin: "2rem auto" }}>
+          <h2 className="lesson-title text-center">{isLogin ? "Connexion" : "Inscription"}</h2>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-        {!isLogin && (
-          <input
-            type="text"
-            placeholder="Nom"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="border p-2 rounded"
-          />
-        )}
-        <input
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          className="border p-2 rounded"
-        />
-        <input
-          type="password"
-          placeholder="Mot de passe"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          className="border p-2 rounded"
-        />
-        {!isLogin && (
-          <input
-            type="password"
-            placeholder="Confirmer mot de passe"
-            value={form.confirmPassword}
-            onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
-            className="border p-2 rounded"
-          />
-        )}
-        <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-          {isLogin ? "Se connecter" : "S’inscrire"}
-        </button>
-      </form>
+          <form className="form-lesson" onSubmit={handleSubmit}>
+            {!isLogin && (
+              <input
+                type="text"
+                placeholder="Nom"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="form-input"
+              />
+            )}
 
-      <div className="mt-2 text-sm flex flex-col gap-1">
-        <button
-          type="button"
-          className="text-blue-600 hover:underline"
-          onClick={() => setIsLogin(!isLogin)}
-        >
-          {isLogin ? "Créer un compte" : "Déjà un compte ? Se connecter"}
-        </button>
+            <input
+              type="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className="form-input"
+            />
 
-        {isLogin && (
-          <button
-            type="button"
-            className="text-blue-600 hover:underline"
-            onClick={handleForgotPassword}
-          >
-            Mot de passe oublié ?
-          </button>
-        )}
+            <input
+              type="password"
+              placeholder="Mot de passe"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              className="form-input"
+            />
 
-        {/* 🔒 Bouton Déconnexion visible seulement si connecté */}
-        {currentUser && (
-          <button
-            type="button"
-            className="text-red-600 hover:underline"
-            onClick={handleLogout}
-          >
-            Déconnexion
-          </button>
-        )}
+            {!isLogin && (
+              <input
+                type="password"
+                placeholder="Confirmer mot de passe"
+                value={form.confirmPassword}
+                onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                className="form-input"
+              />
+            )}
+
+            <div className="lesson-actions">
+              <button type="submit" className="btn btn-submit">
+                {isLogin ? "Se connecter" : "S’inscrire"}
+              </button>
+              {currentUser && (
+                <button type="button" className="btn btn-delete" onClick={handleLogout}>
+                  Déconnexion
+                </button>
+              )}
+            </div>
+          </form>
+
+          <div className="lesson-actions" style={{ justifyContent: "center", flexDirection: "column", gap: "0.5rem", marginTop: "1rem" }}>
+            <button className="btn btn-add" onClick={() => setIsLogin(!isLogin)}>
+              {isLogin ? "Créer un compte" : "Déjà un compte ? Se connecter"}
+            </button>
+
+            {isLogin && (
+              <button className="btn btn-edit" onClick={handleForgotPassword}>
+                Mot de passe oublié ?
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
